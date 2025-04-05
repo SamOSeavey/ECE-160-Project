@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_EVENTS 100
+#define DESC_LENGTH 100
+#define FILE_NAME "events.dat"
+
+typedef struct {
+    int day;
+    int month;
+    int year;
+    char description[DESC_LENGTH];
+} Event; //Puts all variables into structure (EVENT)
+
+void loadEvents(Event events[], int* eventCount) {  //Reads file to load events from saved
+    FILE* file = fopen(FILE_NAME, "rb"); //opens file
+    if (file == NULL) {    //if it doesnt exist
+        printf("No existing events found.\n");
+        return;
+    }
+
+    while (fread(&events[*eventCount], sizeof(Event), 1, file)) {   //Read each event in the life and add it to the events
+        (*eventCount)++;  //add one to the maximum event counter for each event added this way
+    }
+    fclose(file); //close after done
+}
+
+void saveEvents(Event events[], int eventCount) {  //function to save the events
+    FILE* file = fopen(FILE_NAME, "wb"); //opens file
+    if (file == NULL) {  //if doesnt exist
+        printf("Error opening file for saving events.\n");
+        return;
+    }
+
+    fwrite(events, sizeof(Event), eventCount, file);  //saves it
+    fclose(file);
+}
+
+void addEvent(Event events[], int* eventCount) { //adding events
+    if (*eventCount >= MAX_EVENTS) {   //if mroe than 100 events, restrict
+        printf("Event list is full!\n");
+        return;
+    }
+
+    Event newEvent;  //New Event
+    printf("Enter event date (DD MM YYYY): ");
+    scanf_s("%d %d %d", &newEvent.day, &newEvent.month, &newEvent.year);
+    printf("Enter event time and description: ");
+    getchar();
+    fgets(newEvent.description, DESC_LENGTH, stdin);
+    newEvent.description[strcspn(newEvent.description, "\n")] = 0; // remove newline character
+
+    events[*eventCount] = newEvent;
+    (*eventCount)++;
+    printf("Event added successfully!\n");
+}
+
+void viewEvents(Event events[], int eventCount) {
+    if (eventCount == 0) {
+        printf("No events scheduled.\n");
+        return;
+    }
+
+    printf("Scheduled Events:\n");
+    for (int i = 0; i < eventCount; i++) {
+        printf("%02d/%02d/%04d: %s\n", events[i].day, events[i].month, events[i].year, events[i].description);
+    }
+}
+
+int main() {
+    Event events[MAX_EVENTS];
+    int eventCount = 0;
+
+    // Load events from file on startup
+    loadEvents(events, &eventCount);
+
+    int choice;
+    while (1) {
+        printf("\nEvent Scheduler\n");
+        printf("1. Add Event\n");
+        printf("2. View Events\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf_s("%d", &choice);
+
+        switch (choice) {
+        case 1:
+            addEvent(events, &eventCount);
+            saveEvents(events, eventCount);  // Save events after adding
+            break;
+        case 2:
+            viewEvents(events, eventCount);
+            break;
+        case 3:
+            printf("Exiting...\n");
+            saveEvents(events, eventCount);  // Save events before exiting
+            exit(0);
+        default:
+            printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
