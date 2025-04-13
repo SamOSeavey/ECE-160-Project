@@ -6,49 +6,49 @@
 #define DESC_LENGTH 100
 #define FILE_NAME "events.dat"
 
-typedef struct {
+typedef struct { // "typedef_struct" works as a define tool for multiple integers
     int day;
     int month;
     int year;
     char description[DESC_LENGTH];
-} Event; //Puts all variables into structure (EVENT)
+} Event;
 
-void loadEvents(Event events[], int* eventCount) {  //Reads file to load events from saved
-    FILE* file = fopen(FILE_NAME, "rb"); //opens file
-    if (file == NULL) {    //if it doesnt exist
+void loadEvents(Event events[], int* eventCount) { /* Loads Events already Stored on File */
+    FILE* file = fopen(FILE_NAME, "rb");
+    if (file == NULL) {
         printf("No existing events found.\n");
         return;
     }
 
-    while (fread(&events[*eventCount], sizeof(Event), 1, file)) {   //Read each event in the life and add it to the events
-        (*eventCount)++;  //add one to the maximum event counter for each event added this way
+    while (fread(&events[*eventCount], sizeof(Event), 1, file)) { //Increases the number of events that are currently stored in the file
+        (*eventCount)++;
     }
-    fclose(file); //close after done
+    fclose(file);
 }
 
-void saveEvents(Event events[], int eventCount) {  //function to save the events
-    FILE* file = fopen(FILE_NAME, "wb"); //opens file
-    if (file == NULL) {  //if doesnt exist
+void saveEvents(Event events[], int eventCount) {   // Stores the Events on a File
+    FILE* file = fopen(FILE_NAME, "wb");
+    if (file == NULL) {
         printf("Error opening file for saving events.\n");
         return;
     }
 
-    fwrite(events, sizeof(Event), eventCount, file);  //saves it
+    fwrite(events, sizeof(Event), eventCount, file);
     fclose(file);
 }
 
-void addEvent(Event events[], int* eventCount) { //adding events
-    if (*eventCount >= MAX_EVENTS) {   //if mroe than 100 events, restrict
+void addEvent(Event events[], int* eventCount) { // This function won't allow you to add any more events once the limit is reached
+    if (*eventCount >= MAX_EVENTS) {
         printf("Event list is full!\n");
         return;
     }
 
-    Event newEvent;  //New Event
+    Event newEvent; // This function is where the Event Date, Time, and Description is typed in by the user
     printf("Enter event date (DD MM YYYY): ");
     scanf_s("%d %d %d", &newEvent.day, &newEvent.month, &newEvent.year);
     printf("Enter event time and description: ");
-    getchar();
-    fgets(newEvent.description, DESC_LENGTH, stdin);
+    getchar(); // Allows you to type in Desciption lateral to the printf prompt, also gets rid of unneccessary space after description
+    fgets(newEvent.description, DESC_LENGTH, stdin); //
     newEvent.description[strcspn(newEvent.description, "\n")] = 0; // remove newline character
 
     events[*eventCount] = newEvent;
@@ -56,13 +56,13 @@ void addEvent(Event events[], int* eventCount) { //adding events
     printf("Event added successfully!\n");
 }
 
-void viewEvents(Event events[], int eventCount) {
+void viewEvents(Event events[], int eventCount) { //Lets the program tell you that no events are saved yet
     if (eventCount == 0) {
         printf("No events scheduled.\n");
         return;
     }
 
-    printf("Scheduled Events:\n");
+    printf("Scheduled Events:\n"); //This function tells the user all the information about all the events they have input
     for (int i = 0; i < eventCount; i++) {
         printf("%02d/%02d/%04d: %s\n", events[i].day, events[i].month, events[i].year, events[i].description);
     }
@@ -75,7 +75,7 @@ int main() {
     // Load events from file on startup
     loadEvents(events, &eventCount);
 
-    int choice;
+    int choice; //Main Menu Options
     while (1) {
         printf("\nEvent Scheduler\n");
         printf("1. Add Event\n");
@@ -102,4 +102,4 @@ int main() {
     }
 
     return 0;
-}
+} 
